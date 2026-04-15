@@ -16,7 +16,7 @@ The Gender Classifier API is a backend service that predicts the gender of a giv
 
 ## Live API
 
-👉 https://your-app-name.onrender.com
+ https://your-app-name.onrender.com
 
 
 
@@ -164,4 +164,4 @@ Then:
 ---
 
 ## Repository
-
+https://github.com/Prince-Magami/gender-classifier-api.git
