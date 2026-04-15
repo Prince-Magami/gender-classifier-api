@@ -41,21 +41,30 @@ app.get("/api/classify", async (req, res) => {
       });
     }
 
-    let apiResponse;
+let apiResponse;
 
-    try {
-      apiResponse = await axios({
-        method: "GET",
-        url: "https://api.genderize.io",
-        params: { name },
-        timeout: 8000,
-        headers: {
-          Accept: "application/json",
-          "User-Agent": "Mozilla/5.0"
-        }
-      });
-    } catch (apiError) {
-      console.error("Genderize API ERROR:", apiError.message);
+try {
+  apiResponse = await axios({
+    method: "GET",
+    url: "https://api.genderize.io",
+    params: { name },
+    timeout: 10000,
+    headers: {
+      Accept: "application/json",
+      "User-Agent": "Mozilla/5.0"
+    },
+    validateStatus: function (status) {
+      return status >= 200 && status < 500;
+    }
+  });
+} catch (apiError) {
+  console.error("API ERROR:", apiError.message);
+
+  return res.status(502).json({
+    status: "error",
+    message: "External API error occurred"
+  });
+}
 
       return res.status(502).json({
         status: "error",
