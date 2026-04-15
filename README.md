@@ -16,14 +16,13 @@ The Gender Classifier API is a backend service that predicts the gender of a giv
 
 ## Live API
 
- https://your-app-name.onrender.com
+ https://gender-classifier-api-7na9.onrender.com
 
 
 
 ## API Endpoint
 
 ### GET `/api/classify`
-
 
 
 ## Success Response
