@@ -25,8 +25,12 @@ app.get("/api/classify", async (req, res) => {
       });
     }
 
-    const response = await axios.get(`https://api.genderize.io?name=${name}`);
-    const { gender, probability, count } = response.data;
+    const apiResponse = await axios.get(
+      `https://api.genderize.io?name=${encodeURIComponent(name)}`,
+      { timeout: 3000 }
+    );
+
+    const { gender, probability, count } = apiResponse.data;
 
     if (gender === null || count === 0) {
       return res.status(200).json({
@@ -55,10 +59,24 @@ app.get("/api/classify", async (req, res) => {
     });
 
   } catch (error) {
-    return res.status(502).json({
-      status: "error",
-      message: "Failed to fetch data from Genderize API"
-    });
+    console.error("Error:", error.message);
+
+    if (error.response) {
+      return res.status(502).json({
+        status: "error",
+        message: "Genderize API responded with an error"
+      });
+    } else if (error.request) {
+      return res.status(502).json({
+        status: "error",
+        message: "No response from Genderize API"
+      });
+    } else {
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error"
+      });
+    }
   }
 });
 
