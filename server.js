@@ -41,7 +41,7 @@ app.get("/api/classify", async (req, res) => {
       });
     }
 
-let apiResponse;
+    let apiResponse;
 
 try {
   apiResponse = await axios({
@@ -59,6 +59,12 @@ try {
   });
 } catch (apiError) {
   console.error("API ERROR:", apiError.message);
+
+  return res.status(502).json({
+    status: "error",
+    message: "External API error occurred"
+  });
+}
 
   return res.status(502).json({
     status: "error",
