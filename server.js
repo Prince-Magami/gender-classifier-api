@@ -52,9 +52,6 @@ try {
     headers: {
       Accept: "application/json",
       "User-Agent": "Mozilla/5.0"
-    },
-    validateStatus: function (status) {
-      return status >= 200 && status < 500;
     }
   });
 } catch (apiError) {
@@ -66,19 +63,7 @@ try {
   });
 }
 
-  return res.status(502).json({
-    status: "error",
-    message: "External API error occurred"
-  });
-}
-
-      return res.status(502).json({
-        status: "error",
-        message: "External API error occurred"
-      });
-    }
-
-    const { gender, probability, count } = apiResponse.data;
+const { gender, probability, count } = apiResponse.data;
 
     if (!gender || count === 0) {
       return res.status(200).json({
