@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
@@ -16,7 +16,7 @@ app.get("/", (req, res) => {
   res.json({
     status: "success",
     message: "Gender Classifier API is running",
-    endpoint: "/api/classify?name=YourName"
+    usage: "/api/classify?name=John"
   });
 });
 
@@ -41,14 +41,31 @@ app.get("/api/classify", async (req, res) => {
       });
     }
 
-    const apiResponse = await axios.get("https://api.genderize.io", {
-      params: { name },
-      timeout: 3000
-    });
+    let apiResponse;
+
+    try {
+      apiResponse = await axios({
+        method: "GET",
+        url: "https://api.genderize.io",
+        params: { name },
+        timeout: 8000,
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "Mozilla/5.0"
+        }
+      });
+    } catch (apiError) {
+      console.error("Genderize API ERROR:", apiError.message);
+
+      return res.status(502).json({
+        status: "error",
+        message: "External API error occurred"
+      });
+    }
 
     const { gender, probability, count } = apiResponse.data;
 
-    if (gender === null || count === 0) {
+    if (!gender || count === 0) {
       return res.status(200).json({
         status: "error",
         message: "No prediction available for the provided name"
@@ -75,24 +92,12 @@ app.get("/api/classify", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error:", error.message);
+    console.error("SERVER ERROR:", error.message);
 
-    if (error.response) {
-      return res.status(502).json({
-        status: "error",
-        message: "External API error occurred"
-      });
-    } else if (error.request) {
-      return res.status(502).json({
-        status: "error",
-        message: "No response from Genderize API"
-      });
-    } else {
-      return res.status(500).json({
-        status: "error",
-        message: "Internal server error"
-      });
-    }
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error"
+    });
   }
 });
 
