@@ -7,6 +7,14 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
+app.get("/", (req, res) => {
+  res.json({
+    status: "success",
+    message: "Gender Classifier API is running",
+    endpoint: "/api/classify?name=YourName"
+  });
+});
+
 app.get("/api/classify", async (req, res) => {
   try {
     const { name } = req.query;
