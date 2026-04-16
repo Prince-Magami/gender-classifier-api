@@ -49,7 +49,7 @@ for (let i = 0; i < 3; i++) {
       params: { name },
       timeout: 5000
     });
-    break; // success
+    break; 
   } catch (err) {
     if (i === 2) {
       return res.status(502).json({
