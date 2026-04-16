@@ -42,9 +42,10 @@ app.get("/api/classify", async (req, res) => {
     }
 
     let apiResponse;
+
     try {
       apiResponse = await axios.get(
-        `https://api.genderize.io?name=${encodeURIComponent(name)}`
+        `https://api.genderize.io?name=${name}`
       );
     } catch (err) {
       return res.status(502).json({
