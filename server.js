@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
+
 app.get("/", (req, res) => {
   res.json({
     status: "success",
@@ -14,10 +15,12 @@ app.get("/", (req, res) => {
   });
 });
 
+
 app.get("/api/classify", async (req, res) => {
   try {
     let { name } = req.query;
 
+    
     if (name === undefined) {
       return res.status(400).json({
         status: "error",
@@ -40,28 +43,31 @@ app.get("/api/classify", async (req, res) => {
         message: "Name query parameter is required"
       });
     }
-    
-let apiResponse;
 
-for (let i = 0; i < 3; i++) {
-  try {
-    apiResponse = await axios.get("https://api.genderize.io", {
-      params: { name },
-      timeout: 5000
-    });
-    break; 
-  } catch (err) {
-    if (i === 2) {
-      return res.status(502).json({
-        status: "error",
-        message: "Failed to fetch data from Genderize API"
-      });
+ 
+    let apiResponse = null;
+
+    for (let i = 0; i < 3; i++) {
+      try {
+        apiResponse = await axios.get("https://api.genderize.io", {
+          params: { name },
+          timeout: 4000
+        });
+
+        if (apiResponse && apiResponse.data) break;
+      } catch (err) {
+        if (i === 2) {
+          return res.status(502).json({
+            status: "error",
+            message: "Failed to fetch data from Genderize API"
+          });
+        }
+      }
     }
-  }
-}
 
     const { gender, probability, count } = apiResponse.data;
 
+   
     if (gender === null || count === 0) {
       return res.status(200).json({
         status: "error",
@@ -69,6 +75,7 @@ for (let i = 0; i < 3; i++) {
       });
     }
 
+   
     const sample_size = count;
 
     const is_confident =
@@ -76,6 +83,7 @@ for (let i = 0; i < 3; i++) {
 
     const processed_at = new Date().toISOString();
 
+    
     return res.status(200).json({
       status: "success",
       data: {
