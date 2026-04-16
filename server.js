@@ -44,10 +44,15 @@ app.get("/api/classify", async (req, res) => {
     let apiResponse;
 
     try {
-      apiResponse = await axios.get(
-        `https://api.genderize.io?name=${name}`
-      );
-    } catch (err) {
+      apiResponse = await axios.get("https://api.genderize.io", {
+        params: { name },
+        timeout: 5000,
+        headers: {
+          "User-Agent": "Mozilla/5.0",
+          "Accept": "application/json"
+        }
+      });
+    } catch (error) {
       return res.status(502).json({
         status: "error",
         message: "Failed to fetch data from Genderize API"
@@ -56,8 +61,8 @@ app.get("/api/classify", async (req, res) => {
 
     const { gender, probability, count } = apiResponse.data;
 
-    if (!gender || count === 0) {
-      return res.json({
+    if (gender === null || count === 0) {
+      return res.status(200).json({
         status: "error",
         message: "No prediction available for the provided name"
       });
@@ -70,7 +75,7 @@ app.get("/api/classify", async (req, res) => {
 
     const processed_at = new Date().toISOString();
 
-    return res.json({
+    return res.status(200).json({
       status: "success",
       data: {
         name,
