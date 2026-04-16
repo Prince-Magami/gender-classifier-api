@@ -40,24 +40,25 @@ app.get("/api/classify", async (req, res) => {
         message: "Name query parameter is required"
       });
     }
+    
+let apiResponse;
 
-    let apiResponse;
-
-    try {
-      apiResponse = await axios.get("https://api.genderize.io", {
-        params: { name },
-        timeout: 5000,
-        headers: {
-          "User-Agent": "Mozilla/5.0",
-          "Accept": "application/json"
-        }
-      });
-    } catch (error) {
+for (let i = 0; i < 3; i++) {
+  try {
+    apiResponse = await axios.get("https://api.genderize.io", {
+      params: { name },
+      timeout: 5000
+    });
+    break; // success
+  } catch (err) {
+    if (i === 2) {
       return res.status(502).json({
         status: "error",
         message: "Failed to fetch data from Genderize API"
       });
     }
+  }
+}
 
     const { gender, probability, count } = apiResponse.data;
 
