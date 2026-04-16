@@ -7,16 +7,10 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
-
 app.get("/", (req, res) => {
   res.json({
     status: "success",
-    message: "Gender Classifier API is running",
-    usage: "/api/classify?name=John"
+    message: "Gender Classifier API running"
   });
 });
 
@@ -24,17 +18,23 @@ app.get("/api/classify", async (req, res) => {
   try {
     let { name } = req.query;
 
-    if (typeof name === "string") {
-      name = name.trim();
+    if (name === undefined) {
+      return res.status(400).json({
+        status: "error",
+        message: "Name query parameter is required"
+      });
     }
 
-    if (
-      !name ||
-      typeof name !== "string" ||
-      name === "" ||
-      name.toLowerCase() === "undefined" ||
-      name.toLowerCase() === "null"
-    ) {
+    if (typeof name !== "string") {
+      return res.status(422).json({
+        status: "error",
+        message: "Invalid name type"
+      });
+    }
+
+    name = name.trim();
+
+    if (!name) {
       return res.status(400).json({
         status: "error",
         message: "Name query parameter is required"
@@ -42,31 +42,21 @@ app.get("/api/classify", async (req, res) => {
     }
 
     let apiResponse;
-
-try {
-  apiResponse = await axios({
-    method: "GET",
-    url: "https://api.genderize.io",
-    params: { name },
-    timeout: 10000,
-    headers: {
-      Accept: "application/json",
-      "User-Agent": "Mozilla/5.0"
+    try {
+      apiResponse = await axios.get(
+        `https://api.genderize.io?name=${encodeURIComponent(name)}`
+      );
+    } catch (err) {
+      return res.status(502).json({
+        status: "error",
+        message: "Failed to fetch data from Genderize API"
+      });
     }
-  });
-} catch (apiError) {
-  console.error("API ERROR:", apiError.message);
 
-  return res.status(502).json({
-    status: "error",
-    message: "External API error occurred"
-  });
-}
-
-const { gender, probability, count } = apiResponse.data;
+    const { gender, probability, count } = apiResponse.data;
 
     if (!gender || count === 0) {
-      return res.status(200).json({
+      return res.json({
         status: "error",
         message: "No prediction available for the provided name"
       });
@@ -79,7 +69,7 @@ const { gender, probability, count } = apiResponse.data;
 
     const processed_at = new Date().toISOString();
 
-    return res.status(200).json({
+    return res.json({
       status: "success",
       data: {
         name,
@@ -92,8 +82,6 @@ const { gender, probability, count } = apiResponse.data;
     });
 
   } catch (error) {
-    console.error("SERVER ERROR:", error.message);
-
     return res.status(500).json({
       status: "error",
       message: "Internal server error"
