@@ -16,7 +16,7 @@ The Gender Classifier API is a backend service that predicts the gender of a giv
 
 ## Live API
 
- https://gender-classifier-api-7na9.onrender.com
+https://gender-classifier-api-production-cfa0.up.railway.app
 
 
 
